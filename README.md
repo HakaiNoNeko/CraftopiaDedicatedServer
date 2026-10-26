@@ -1,0 +1,41 @@
+# Craftopia Server Manager
+
+A wrapper around the stock Craftopia dedicated server (Steam app 1670340) that adds what it lacks.
+Pure Python 3 stdlib, no game files modified, nothing to build.
+
+## What the stock server has / lacks
+
+Stock console commands: `help`, `list`, `kick <id>`, `ban <id>` (IP-based), `pardon <address>`, `say`, `tell`, `lock`/`unlock`, `fps`, `stop`.
+Missing: whitelist, backups, remote control, admins by name, in-game chat commands, crash restart, scheduled restarts.
+Also fixed: the stock `savePath=DedicatedServerSave/` is glued onto the install path without a slash
+(`...CraftopiaDedicatedServerDedicatedServerSave`), so the manager pins an absolute `savePath` (`data/save/`).
+
+## Features
+
+- Crash auto-restart, optional scheduled restarts with in-game countdown warnings
+- Consistent backups (SQLite online-backup API on the live `.db` files), interval + on-stop, retention
+- Whitelist, name bans (persisted), admin list; non-whitelisted/banned players are kicked on join
+- In-game chat commands (`!help`, `!players`, admin: `!kick`, `!ban`, `!whitelist add X`, `!backup`, `!restart` ...)
+- Remote HTTP API (bearer token, localhost by default) and `ctl` CLI; Discord webhook for join/leave/backup/crash
+- Any unrecognised command is passed straight to the game console
+
+## Use
+
+```bash
+python3 craftopia_server.py            # first run writes config.json (random API token)
+python3 craftopia_server.py ctl backup # talk to the running manager
+python3 craftopia_server.py ctl whitelist add SomeName
+python3 -m unittest
+```
+
+API: `GET /status`, `GET /logs`, `POST /command {"command": "..."}` with `Authorization: Bearer <token>`.
+Edit `config.json` for the install path, backup/restart schedule, API port (default 27700) and whitelist toggle.
+
+## Known limits (please read)
+
+- **Join/leave detection and chat commands are unverified.** The `list` and chat output formats could not be captured
+  without a connected client; `player_regex` / `chat_regex` in `config.json` are best guesses. Join a test player,
+  look at `data/server.log`, and adjust the regexes. Whitelist/ban enforcement and chat commands depend on them.
+  Until verified, keep `whitelist_enabled` false.
+- Players are matched by display name (the console exposes no stable account id), so names can be impersonated.
+- World load takes 2-3 minutes; the manager treats the server as ready on the "World is loaded" line.
