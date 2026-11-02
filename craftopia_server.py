@@ -46,6 +46,7 @@ def load_config(path):
             cfg[k].update(v) if isinstance(v, dict) and isinstance(cfg.get(k), dict) else cfg.__setitem__(k, v)
     else:
         cfg["api"]["token"] = os.urandom(16).hex()
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps({"api": {"token": cfg["api"]["token"]}}, indent=2))  # overrides only; defaults stay in code
     return cfg
 
@@ -297,7 +298,7 @@ def ctl(cfg, words):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("-V", "--version"): sys.exit(print(VERSION))
     cfg = load_config(HOME_DIR / "config.json")
     if len(sys.argv) > 1 and sys.argv[1] == "ctl": ctl(cfg, sys.argv[2:])
-    elif len(sys.argv) > 1 and sys.argv[1] in ("-V", "--version"): print(VERSION)
     else: Manager(cfg).serve()
