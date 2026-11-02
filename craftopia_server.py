@@ -41,13 +41,14 @@ NOISE = re.compile(r"mesh data|Convex Mesh|referenced script|Register NetworkObj
 
 def load_config(path):
     cfg = json.loads(json.dumps(DEFAULTS))
-    if path.exists():
-        for k, v in json.loads(path.read_text()).items():
-            cfg[k].update(v) if isinstance(v, dict) and isinstance(cfg.get(k), dict) else cfg.__setitem__(k, v)
-    else:
+    raw = json.loads(path.read_text()) if path.exists() else {}
+    for k, v in raw.items():
+        cfg[k].update(v) if isinstance(v, dict) and isinstance(cfg.get(k), dict) else cfg.__setitem__(k, v)
+    if not cfg["api"]["token"]:  # first run, or an installer wrote the config without one
         cfg["api"]["token"] = os.urandom(16).hex()
+        raw.setdefault("api", {})["token"] = cfg["api"]["token"]
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({"api": {"token": cfg["api"]["token"]}}, indent=2))  # overrides only; defaults stay in code
+        path.write_text(json.dumps(raw, indent=2))  # overrides only; defaults stay in code
     return cfg
 
 

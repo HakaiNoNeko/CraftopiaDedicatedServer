@@ -52,6 +52,13 @@ class Tests(unittest.TestCase):
             m.on_line("[Chat] 7: !kick Eve"); __import__("time").sleep(0.3)  # id 7 resolves to admin Alice
             self.assertIn("kick 5", m.sent)
 
+    def test_config_gets_token_when_installer_omits_it(self):
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as t:
+            p = Path(t) / "sub" / "config.json"; p.parent.mkdir(); p.write_text('{"install_dir": "X"}')
+            cfg = cs.load_config(p)
+            self.assertEqual(len(cfg["api"]["token"]), 32)
+            self.assertEqual(cs.load_config(p)["api"]["token"], cfg["api"]["token"])  # persisted, stable
+
 
 if __name__ == "__main__":
     unittest.main()

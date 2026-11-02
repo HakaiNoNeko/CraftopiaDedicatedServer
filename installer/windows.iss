@@ -52,13 +52,6 @@ begin
     end;
 end;
 
-function Token: String;
-var I: Integer;
-begin
-  Result := '';
-  for I := 1 to 32 do Result := Result + Copy('0123456789abcdef', Random(16) + 1, 1);
-end;
-
 procedure CurStepChanged(CurStep: TSetupStep);
 var Dir, Cfg, Game: String;
 begin
@@ -71,8 +64,7 @@ begin
     begin
       Game := GamePage.Values[0];
       StringChangeEx(Game, '\', '\\', True);  { JSON needs escaped backslashes }
-      Randomize;
-      SaveStringToFile(Cfg, '{"install_dir": "' + Game + '", "api": {"token": "' + Token + '"}}', False);
+      SaveStringToFile(Cfg, '{"install_dir": "' + Game + '"}', False);
     end;
   end;
 end;
