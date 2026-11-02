@@ -14,9 +14,9 @@ def make_mgr(tmp):
 
 class Tests(unittest.TestCase):
     def test_backup_snapshots_db_and_prunes(self):
-        with tempfile.TemporaryDirectory() as t:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as t:
             t = Path(t); save = t / "save"; (save / "Worlds").mkdir(parents=True)
-            db = sqlite3.connect(save / "Worlds" / "w.db"); db.execute("create table x(a)"); db.execute("insert into x values (7)"); db.commit()
+            db = sqlite3.connect(save / "Worlds" / "w.db"); db.execute("create table x(a)"); db.execute("insert into x values (7)"); db.commit(); db.close()
             for _ in range(3):
                 out = cs.make_backup(save, t / "bk", keep=2)
                 (t / "bk" / "craftopia-0.tar.gz").touch()  # ensure distinct sort keys
@@ -24,7 +24,7 @@ class Tests(unittest.TestCase):
             self.assertIn("save/Worlds/w.db", tarfile.open(out).getnames())
 
     def test_permissions_and_stores(self):
-        with tempfile.TemporaryDirectory() as t:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as t:
             m = make_mgr(t)
             self.assertEqual(m.run_command("kick bob", admin=False), "Admins only.")
             m.run_command("admin add Alice"); self.assertTrue(m.admins.has("alice"))
@@ -33,7 +33,7 @@ class Tests(unittest.TestCase):
             m.run_command("whitelist remove bob"); self.assertFalse(m.whitelist.has("Bob"))
 
     def test_whitelist_and_ban_kick(self):
-        with tempfile.TemporaryDirectory() as t:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as t:
             m = make_mgr(t); m.cfg["whitelist_enabled"] = True; m.admins.add("Alice"); m.whitelist.add("Bob")
             m.player_re = __import__("re").compile(m.cfg["player_regex"])
             lines = ["playerId,name", '1,"Alice"', '2,"Bob"', '3,"Eve"', '4,""']
@@ -44,7 +44,7 @@ class Tests(unittest.TestCase):
             self.assertIn("kick 2", m.sent)
 
     def test_chat_command_routing(self):
-        with tempfile.TemporaryDirectory() as t:
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as t:
             m = make_mgr(t); m.admins.add("Alice"); m.players = {"5": "Eve"}
             m.chat_command("Eve", "!kick Eve"); self.assertNotIn("kick 5", m.sent)
             m.chat_command("Alice", "!kick Eve"); self.assertIn("kick 5", m.sent)
