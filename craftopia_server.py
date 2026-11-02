@@ -117,11 +117,15 @@ class Manager:
         if NOISE.search(line): return
         self.log.write(line + "\n"); self.tail.append(line); print(line, flush=True)
         if self.capture is not None: self.capture.append(line)
-        if "World is loaded" in line:
-            self.ready = True; self.notify("Server is up")
         m = self.chat_re.match(line)
         if m and m["msg"].startswith(self.cfg["chat_prefix"]):
             threading.Thread(target=self.chat_command, args=(m["name"].strip(), m["msg"].strip()), daemon=True).start()
+
+    def check_ready(self):
+        # "World is loaded!" is written to Unity's player log only, never to stdout.
+        logs = sorted((Path.home() / ".config/unity3d/PocketPair/Craftopia/Logs_DS").glob("PlayerLog_*.log"))
+        if logs and logs[-1].stat().st_mtime >= self.started_at and "World is loaded" in logs[-1].read_bytes().decode("utf-16", "ignore"):
+            self.ready = True; self.notify("Server is up")
 
     def reader(self, proc):
         for line in proc.stdout: self.on_line(line.rstrip("\n"))
@@ -200,6 +204,7 @@ class Manager:
         warned = set()
         while not self.stopping:
             time.sleep(1); now = time.time()
+            if not self.ready: self.check_ready()
             if not self.ready: continue
             if b["interval_min"] and now - last_backup >= b["interval_min"] * 60:
                 last_backup = now
