@@ -15,7 +15,7 @@ Also fixed: the stock `savePath=DedicatedServerSave/` is glued onto the install 
 - Crash auto-restart, optional scheduled restarts with in-game countdown warnings
 - Consistent backups (SQLite online-backup API on the live `.db` files), interval + on-stop, retention
 - Whitelist, name bans (persisted), admin list; non-whitelisted/banned players are kicked on join
-- In-game chat commands (`!help`, `!players`, admin: `!kick`, `!ban`, `!whitelist add X`, `!backup`, `!restart` ...)
+- Chat-command handling (`!kick`, `!ban`, `!whitelist add X`, ...) is implemented but needs a chat source; see limits
 - Remote HTTP API (bearer token, localhost by default) and `ctl` CLI; Discord webhook for join/leave/backup/crash
 - Any unrecognised command is passed straight to the game console
 
@@ -33,9 +33,11 @@ Edit `config.json` for the install path, backup/restart schedule, API port (defa
 
 ## Known limits (please read)
 
-- **Join/leave detection and chat commands are unverified.** The `list` and chat output formats could not be captured
-  without a connected client; `player_regex` / `chat_regex` in `config.json` are best guesses. Join a test player,
-  look at `data/server.log`, and adjust the regexes. Whitelist/ban enforcement and chat commands depend on them.
-  Until verified, keep `whitelist_enabled` false.
+- **Verified against a real join:** `list` prints CSV (`playerId,name`, rows like `800,"Kisaragi"`; the name is empty
+  until the client finishes joining, which is ignored). Join/leave detection uses that.
+- **In-game chat commands do not work on the stock server.** It never prints player chat to stdout or its log
+  (chat travels over the `OcNetRpc_Chat` network RPC). Admin actions work from the console, the HTTP API/`ctl`, and
+  Discord-style tooling; chat commands need an in-process server plugin (BepInEx/Harmony) that hooks that RPC.
+- Whitelist/ban enforcement is based on the verified `list` format but has not yet been exercised with a non-whitelisted player.
 - Players are matched by display name (the console exposes no stable account id), so names can be impersonated.
 - World load takes 2-3 minutes; the manager treats the server as ready on the "World is loaded" line.

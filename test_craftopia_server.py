@@ -36,7 +36,7 @@ class Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             m = make_mgr(t); m.cfg["whitelist_enabled"] = True; m.admins.add("Alice"); m.whitelist.add("Bob")
             m.player_re = __import__("re").compile(m.cfg["player_regex"])
-            lines = ["1: Alice", "2: Bob", "3: Eve"]
+            lines = ["playerId,name", '1,"Alice"', '2,"Bob"', '3,"Eve"', '4,""']
             m.send = lambda c: (m.sent.append(c), c == "list" and [m.on_line(l) for l in lines])
             m.poll_players()
             self.assertEqual([c for c in m.sent if c.startswith("kick")], ["kick 3"])

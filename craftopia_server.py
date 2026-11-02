@@ -21,9 +21,9 @@ DEFAULTS = {
     "chat_prefix": "!",
     "poll_s": 10,
     "discord_webhook": "",
-    # Output formats could not be verified without a connected client; adjust to your log
-    # if joins/chat are not detected. Named groups: id, name (players); name, msg (chat).
-    "player_regex": r"^\s*\[?(?P<id>\d+)\]?[\s:,\-]+(?P<name>[^\s,].*?)\s*$",
+    # `list` prints CSV: header "playerId,name", rows 800,"Kisaragi" (name is "" until the client finishes joining).
+    # The stock server never logs player chat, so chat_regex only matches if a plugin/log source emits such lines.
+    "player_regex": r'^(?P<id>\d+),"(?P<name>[^"]+)"$',
     "chat_regex": r"^\[?(?:Chat|Say)\]?\s*[\[<]?(?P<name>[^\]>:]+)[\]>:]\s*(?P<msg>.+)$",
 }
 NOISE = re.compile(r"mesh data|Convex Mesh|referenced script|Register NetworkObject|^\s*$")
@@ -114,9 +114,9 @@ class Manager:
             except Exception: pass
 
     def on_line(self, line):
+        if self.capture is not None: self.capture.append(line); return  # `list` reply, not log material
         if NOISE.search(line): return
         self.log.write(line + "\n"); self.tail.append(line); print(line, flush=True)
-        if self.capture is not None: self.capture.append(line)
         m = self.chat_re.match(line)
         if m and m["msg"].startswith(self.cfg["chat_prefix"]):
             threading.Thread(target=self.chat_command, args=(m["name"].strip(), m["msg"].strip()), daemon=True).start()
