@@ -3,6 +3,23 @@
 A wrapper around the stock Craftopia dedicated server (Steam app 1670340) that adds what it lacks.
 Pure Python 3 stdlib, no game files modified, nothing to build.
 
+## Install
+
+Install **Craftopia Dedicated Server** from Steam first, then:
+
+**Windows:** download `CraftopiaServerManager-Setup.exe` from the [latest release](../../releases/latest) and run it. Pick your
+`CraftopiaDedicatedServer` folder when asked. It installs BepInEx and the chat plugin into the server and adds a Start Menu entry.
+(Windows support is new and was built by CI; please report problems.)
+
+**Linux:**
+
+```bash
+curl -fsSL https://github.com/HakaiNoNeko/CraftopiaDedicatedServer/releases/latest/download/install.sh | bash -s -- --service
+```
+
+Drop `--service` to skip the systemd user service, or pass your server folder as the first argument if it is not in the default Steam path.
+Then run `craftopia-server`. Open **UDP 6587** in your firewall/router so others can join.
+
 ## What the stock server has / lacks
 
 Stock console commands: `help`, `list`, `kick <id>`, `ban <id>` (IP-based), `pardon <address>`, `say`, `tell`, `lock`/`unlock`, `fps`, `stop`.

@@ -10,9 +10,19 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+WIN = sys.platform == "win32"
+VERSION = "1.0.0"
+# Config/data live next to the script when run from a checkout, in a per-user folder when installed (frozen exe).
+HOME_DIR = Path(os.environ["CSM_HOME"]) if os.environ.get("CSM_HOME") else (
+    (Path(os.environ.get("APPDATA", Path.home())) / "CraftopiaServerManager" if WIN else Path.home() / ".config/craftopia-server-manager")
+    if getattr(sys, "frozen", False) else HERE)
+STEAM_COMMON = (Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Steam" if WIN
+                else Path.home() / ".local/share/Steam") / "steamapps/common"
+UNITY_LOG_DIR = (Path.home() / "AppData/LocalLow" if WIN else Path.home() / ".config/unity3d") / "PocketPair/Craftopia/Logs_DS"
+GAME_EXE = "Craftopia.exe" if WIN else "Craftopia.x86_64"
 DEFAULTS = {
-    "install_dir": str(Path.home() / ".local/share/Steam/steamapps/common/CraftopiaDedicatedServer"),
-    "data_dir": str(HERE / "data"),          # whitelist/admins/bans/backups/logs live here
+    "install_dir": str(STEAM_COMMON / "CraftopiaDedicatedServer"),
+    "data_dir": str(HOME_DIR / "data"),          # whitelist/admins/bans/backups/logs live here
     "extra_args": ["-batchmode", "-nographics", "-logFile", "-"],
     "api": {"enabled": True, "host": "127.0.0.1", "port": 27700, "token": ""},
     "backup": {"interval_min": 30, "keep": 24, "on_stop": True},
@@ -123,7 +133,9 @@ class Manager:
 
     def check_ready(self):
         # "World is loaded!" is written to Unity's player log only, never to stdout.
-        logs = sorted((Path.home() / ".config/unity3d/PocketPair/Craftopia/Logs_DS").glob("PlayerLog_*.log"))
+        logs = sorted(UNITY_LOG_DIR.glob("PlayerLog_*.log"))
+        if not UNITY_LOG_DIR.exists() and time.time() - self.started_at > 120:
+            self.ready = True; self.notify("Server assumed up (no Unity log folder found)"); return  # unverified fallback
         if logs and logs[-1].stat().st_mtime >= self.started_at and "World is loaded" in logs[-1].read_bytes().decode("utf-16", "ignore"):
             self.ready = True; self.notify("Server is up")
 
@@ -233,8 +245,8 @@ class Manager:
         for s in (signal.SIGINT, signal.SIGTERM): signal.signal(s, lambda *_: self.run_command("shutdown"))
         while not self.stopping:
             self.ready, self.restart_req, self.players = False, False, {}
-            bep = self.install / "run_bepinex.sh"  # present once install_plugin.sh has run
-            cmd = [str(bep), "Craftopia.x86_64"] if bep.exists() else [str(self.install / "Craftopia.x86_64")]
+            bep = self.install / "run_bepinex.sh"  # Linux only; on Windows BepInEx loads through winhttp.dll
+            cmd = [str(bep), GAME_EXE] if bep.exists() and not WIN else [str(self.install / GAME_EXE)]
             self.proc = subprocess.Popen(cmd + self.cfg["extra_args"],
                 cwd=self.install, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
             self.started_at = time.time()
@@ -285,6 +297,7 @@ def ctl(cfg, words):
 
 
 if __name__ == "__main__":
-    cfg = load_config(HERE / "config.json")
+    cfg = load_config(HOME_DIR / "config.json")
     if len(sys.argv) > 1 and sys.argv[1] == "ctl": ctl(cfg, sys.argv[2:])
+    elif len(sys.argv) > 1 and sys.argv[1] in ("-V", "--version"): print(VERSION)
     else: Manager(cfg).serve()

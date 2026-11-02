@@ -2,7 +2,6 @@ using System;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
-using UnityEngine;
 
 // Server-side only. The stock server never logs player chat (it travels over the OcNetRpc_Chat RPC), so
 // this prints each client chat message to stdout as "[Chat] <netPlayerId>: <text>" for the manager to parse.
@@ -35,6 +34,6 @@ public class Plugin : BaseUnityPlugin
             Console.Out.WriteLine($"[Chat] {from}: {text.Replace('\n', ' ')}"); Console.Out.Flush();
             return !(hideCommands.Value && text.StartsWith(commandPrefix.Value, StringComparison.Ordinal));
         }
-        catch (Exception e) { Debug.LogError("[ServerChat] " + e); return true; }
+        catch (Exception e) { Console.Error.WriteLine("[ServerChat] " + e); return true; }
     }
 }

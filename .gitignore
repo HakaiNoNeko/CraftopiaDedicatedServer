@@ -3,3 +3,5 @@ data/
 __pycache__/
 plugin/bin/
 plugin/obj/
+build/
+dist/
