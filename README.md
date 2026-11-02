@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="Visitors" src="https://count.getloli.com/@HakaiNoNeko-CraftopiaDedicatedServer?name=HakaiNoNeko-CraftopiaDedicatedServer&theme=minecraft&padding=7&offset=0&align=top&scale=0.5&pixelated=1&darkmode=auto">
+  <img alt="Visitors" src="https://count.getloli.com/@HakaiNoNeko-CraftopiaDedicatedServer?name=HakaiNoNeko-CraftopiaDedicatedServer&theme=cat-girls-yay&padding=7&offset=0&align=top&scale=0.8&pixelated=1&darkmode=auto">
 </p>
 
 <p align="center">
