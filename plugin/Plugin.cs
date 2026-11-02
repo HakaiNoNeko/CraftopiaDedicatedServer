@@ -31,7 +31,8 @@ public class Plugin : BaseUnityPlugin
             var req = Traverse.Create(__0);
             var text = req.Field("Message").GetValue<string>() ?? "";
             var from = req.Field("FromNetPlId").GetValue<int>();
-            Debug.Log($"[Chat] {from}: {text.Replace('\n', ' ')}");
+            // Debug.Log only reaches Unity's log file, not stdout, so write to stdout directly.
+            Console.Out.WriteLine($"[Chat] {from}: {text.Replace('\n', ' ')}"); Console.Out.Flush();
             return !(hideCommands.Value && text.StartsWith(commandPrefix.Value, StringComparison.Ordinal));
         }
         catch (Exception e) { Debug.LogError("[ServerChat] " + e); return true; }

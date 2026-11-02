@@ -36,7 +36,7 @@ def load_config(path):
             cfg[k].update(v) if isinstance(v, dict) and isinstance(cfg.get(k), dict) else cfg.__setitem__(k, v)
     else:
         cfg["api"]["token"] = os.urandom(16).hex()
-        path.write_text(json.dumps(cfg, indent=2))
+        path.write_text(json.dumps({"api": {"token": cfg["api"]["token"]}}, indent=2))  # overrides only; defaults stay in code
     return cfg
 
 
