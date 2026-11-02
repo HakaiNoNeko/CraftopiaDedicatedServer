@@ -6,10 +6,6 @@
 </p>
 
 <p align="center">
-  <img alt="Visitors" src="https://count.getloli.com/@HakaiNoNeko-CraftopiaDedicatedServer?name=HakaiNoNeko-CraftopiaDedicatedServer&theme=cat-girls-yay&padding=7&offset=0&align=top&scale=0.8&pixelated=1&darkmode=auto">
-</p>
-
-<p align="center">
   <a href="../../releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/HakaiNoNeko/CraftopiaDedicatedServer?style=for-the-badge"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge"></a>
   <img alt="Python 3" src="https://img.shields.io/badge/python-3%20stdlib-3776AB?style=for-the-badge&logo=python&logoColor=white">
@@ -96,5 +92,5 @@ Please read these before relying on the manager.
 ---
 
 <p align="center">
-  Counter by <a href="https://github.com/journey-ad/Moe-Counter">Moe Counter!</a> · Released under the <a href="LICENSE">MIT License</a>
+  Released under the <a href="LICENSE">MIT License</a>
 </p>
