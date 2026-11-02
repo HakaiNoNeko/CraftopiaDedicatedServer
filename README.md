@@ -35,9 +35,11 @@ Edit `config.json` for the install path, backup/restart schedule, API port (defa
 
 - **Verified against a real join:** `list` prints CSV (`playerId,name`, rows like `800,"Kisaragi"`; the name is empty
   until the client finishes joining, which is ignored). Join/leave detection uses that.
-- **In-game chat commands do not work on the stock server.** It never prints player chat to stdout or its log
-  (chat travels over the `OcNetRpc_Chat` network RPC). Admin actions work from the console, the HTTP API/`ctl`, and
-  Discord-style tooling; chat commands need an in-process server plugin (BepInEx/Harmony) that hooks that RPC.
+- **In-game chat commands need the bundled plugin.** The stock server never logs player chat (it travels over the
+  `OcNetRpc_Chat` RPC). `./install_plugin.sh` unpacks BepInEx into the server and builds `plugin/`, which prints
+  `[Chat] <playerId>: <text>` to stdout; the manager then launches the server through `run_bepinex.sh` automatically.
+  `!`-prefixed messages are hidden from other players. Installed and hook confirmed loading; end-to-end chat not yet
+  verified with a real player, and the chat sender id is assumed to equal the `list` playerId.
 - Whitelist/ban enforcement is based on the verified `list` format but has not yet been exercised with a non-whitelisted player.
 - Players are matched by display name (the console exposes no stable account id), so names can be impersonated.
 - World load takes 2-3 minutes; the manager treats the server as ready on the "World is loaded" line.

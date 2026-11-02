@@ -48,6 +48,9 @@ class Tests(unittest.TestCase):
             m = make_mgr(t); m.admins.add("Alice"); m.players = {"5": "Eve"}
             m.chat_command("Eve", "!kick Eve"); self.assertNotIn("kick 5", m.sent)
             m.chat_command("Alice", "!kick Eve"); self.assertIn("kick 5", m.sent)
+            m.players["7"] = "Alice"; m.sent.clear()
+            m.on_line("[Chat] 7: !kick Eve"); __import__("time").sleep(0.3)  # id 7 resolves to admin Alice
+            self.assertIn("kick 5", m.sent)
 
 
 if __name__ == "__main__":

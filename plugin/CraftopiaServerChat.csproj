@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>CraftopiaServerChat</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- Dedicated server install; BepInEx must already be unpacked there (see ../install_plugin.sh) -->
+    <ServerDir Condition="'$(ServerDir)' == ''">$(HOME)/.local/share/Steam/steamapps/common/CraftopiaDedicatedServer</ServerDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BepInEx"><HintPath>$(ServerDir)/BepInEx/core/BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(ServerDir)/BepInEx/core/0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ServerDir)/Craftopia_Data/Managed/UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ServerDir)/Craftopia_Data/Managed/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="Deploy" AfterTargets="Build">
+    <Copy SourceFiles="$(OutputPath)CraftopiaServerChat.dll" DestinationFolder="$(ServerDir)/BepInEx/plugins" />
+  </Target>
+</Project>

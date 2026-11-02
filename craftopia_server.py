@@ -22,9 +22,9 @@ DEFAULTS = {
     "poll_s": 10,
     "discord_webhook": "",
     # `list` prints CSV: header "playerId,name", rows 800,"Kisaragi" (name is "" until the client finishes joining).
-    # The stock server never logs player chat, so chat_regex only matches if a plugin/log source emits such lines.
+    # The stock server never logs chat; the BepInEx plugin in plugin/ prints "[Chat] <netPlayerId>: <text>".
     "player_regex": r'^(?P<id>\d+),"(?P<name>[^"]+)"$',
-    "chat_regex": r"^\[?(?:Chat|Say)\]?\s*[\[<]?(?P<name>[^\]>:]+)[\]>:]\s*(?P<msg>.+)$",
+    "chat_regex": r"^\[Chat\] (?P<name>[^:]+): (?P<msg>.+)$",  # emitted by plugin/ (id or name before the colon)
 }
 NOISE = re.compile(r"mesh data|Convex Mesh|referenced script|Register NetworkObject|^\s*$")
 
@@ -188,6 +188,7 @@ class Manager:
         self.send(line); return "(sent to server console)"  # anything else goes straight to the game
 
     def chat_command(self, name, msg):
+        name = self.players.get(name, name)  # plugin reports the numeric player id
         admin = self.admins.has(name)
         reply = self.run_command(msg[len(self.cfg["chat_prefix"]):], admin)
         if cmd_is_chat_reply(reply): self.say(reply)
@@ -232,7 +233,9 @@ class Manager:
         for s in (signal.SIGINT, signal.SIGTERM): signal.signal(s, lambda *_: self.run_command("shutdown"))
         while not self.stopping:
             self.ready, self.restart_req, self.players = False, False, {}
-            self.proc = subprocess.Popen([str(self.install / "Craftopia.x86_64"), *self.cfg["extra_args"]],
+            bep = self.install / "run_bepinex.sh"  # present once install_plugin.sh has run
+            cmd = [str(bep), "Craftopia.x86_64"] if bep.exists() else [str(self.install / "Craftopia.x86_64")]
+            self.proc = subprocess.Popen(cmd + self.cfg["extra_args"],
                 cwd=self.install, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
             self.started_at = time.time()
             threading.Thread(target=self.reader, args=(self.proc,), daemon=True).start()
