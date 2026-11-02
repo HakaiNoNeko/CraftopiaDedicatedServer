@@ -11,7 +11,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 WIN = sys.platform == "win32"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 # Config/data live next to the script when run from a checkout, in a per-user folder when installed (frozen exe).
 HOME_DIR = Path(os.environ["CSM_HOME"]) if os.environ.get("CSM_HOME") else (
     (Path(os.environ.get("APPDATA", Path.home())) / "CraftopiaServerManager" if WIN else Path.home() / ".config/craftopia-server-manager")

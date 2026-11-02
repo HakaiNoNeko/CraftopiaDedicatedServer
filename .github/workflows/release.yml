@@ -20,7 +20,7 @@ jobs:
       - name: Package
         run: |
           d=craftopia-server-manager; mkdir -p $d dist
-          cp craftopia_server.py LICENSE README.md installer/install.sh build/CraftopiaServerChat.dll $d/
+          cp craftopia_server.py LICENSE README.md installer/install.sh build/CraftopiaServerChat.dll $d/; chmod +x $d/install.sh
           cp -r build/bepinex-linux_x64 $d/bepinex
           tar czf dist/craftopia-server-manager-linux.tar.gz $d
           cp installer/bootstrap.sh dist/install.sh
